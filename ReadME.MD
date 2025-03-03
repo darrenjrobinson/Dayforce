@@ -1,7 +1,7 @@
 # Dayforce HCM PowerShell Module 
 
 A foundational PowerShell Module to query Employee data from Dayforce. 
-Minimal cmdlets to update Dayfroce for business email/contact info and Single Sign On.
+Minimal cmdlets to update Dayforce for business email/contact info and Federated Single Sign On.
 
 Author: Darren Robinson - February 2025
 
