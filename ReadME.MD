@@ -1,8 +1,31 @@
 # Dayforce HCM PowerShell Module 
 
 A foundational PowerShell Module to query Employee data from Dayforce. 
+Minimal cmdlets to update Dayfroce for business email/contact info and Single Sign On.
 
-Author: Darren Robinson - January 2025
+Author: Darren Robinson - February 2025
+
+
+```powershell
+
+get-command -module Dayforce | sort-object Name | Get-Help | FT Name, Synopsis -autosize
+
+Name                              Synopsis
+----                              --------
+Build-UserProfile                 Take a Dayforce Employee Object and build a User Profile Object
+Connect-Dayforce                  Authenticate to Dayforce and get an Access Token.
+Get-DayForceEmployee              Get an Employee from Dayforce
+Get-DayForceEmployees             Get Employees from Dayforce
+Get-EmployeeBulkExport            Get a Bulk Export of Employees from Dayforce
+Get-EmployeeBulkExportStatus      Get a Bulk Export Request Status from Dayforce
+Invoke-DayForceRequest            Submit a Dayforce API Request.
+Start-EmployeeBulkExport          Request a Bulk Export of Employees from Dayforce
+Update-DayForceEmployee           Update an Employee in Dayforce
+Update-DayForceEmployeeContact    Update an Employees Contact in Dayforce
+Update-DayForceEmployeeSSOAccount Update/Add an Employee SSO Account in Dayforce
+
+```
+
 
 ## Dayforce API Enablement
 
