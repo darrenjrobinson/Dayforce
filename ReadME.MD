@@ -1,4 +1,5 @@
 # Dayforce HCM PowerShell Module 
+[![PSGallery Version](https://img.shields.io/powershellgallery/v/Dayforce.svg?style=flat&logo=powershell&label=PSGallery%20Version)](https://www.powershellgallery.com/packages/Dayforce) [![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/Dayforce.svg?style=flat&logo=powershell&label=PSGallery%20Downloads)](https://www.powershellgallery.com/packages/Dayforce)
 
 A foundational PowerShell Module to query Employee data from Dayforce. 
 Minimal cmdlets to update Dayforce for business email/contact info and Federated Single Sign On.
