@@ -91,7 +91,7 @@ The content type of this body should be application/x-www-form-urlencoded.
         grant_type = "password"
         companyId  = $companyId
         username   = $credential.UserName
-        password   = $credential.Password | ConvertFrom-SecureString -AsPlainText 
+        password   = "$($credential.GetNetworkCredential().password)"
         client_id  = "Dayforce.HCMAnywhere.Client"
     }
 
@@ -579,10 +579,10 @@ http://darrenjrobinson.com/
     try {
         
         $response = Invoke-RestMethod -Uri "https://$($dfTenantId).dayforcehcm.com/api/$($companyId)/V1/Employees/$($xRefCode)" `
-        -Method Patch `
-        -Headers @{authorization = "Bearer $Global:dfAccessToken" }  `
-        -ContentType "application/json" `
-        -Body $request
+            -Method Patch `
+            -Headers @{authorization = "Bearer $Global:dfAccessToken" }  `
+            -ContentType "application/json" `
+            -Body $request
 
         
         if ($null -ne $response.data) {
@@ -755,10 +755,10 @@ http://darrenjrobinson.com/
     try {
         
         $response = Invoke-RestMethod -Uri "https://$($dfTenantId).dayforcehcm.com/api/$($companyId)/V1/Employees/$($xRefCode)/Contacts" `
-        -Method Patch `
-        -Headers @{authorization = "Bearer $Global:dfAccessToken" }  `
-        -ContentType "application/json" `
-        -Body $request
+            -Method Patch `
+            -Headers @{authorization = "Bearer $Global:dfAccessToken" }  `
+            -ContentType "application/json" `
+            -Body $request
 
         if ($null -ne $response.data) {
             return $response.data
