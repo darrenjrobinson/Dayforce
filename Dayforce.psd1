@@ -1,15 +1,15 @@
 @{
     RootModule           = 'Dayforce.psm1'
-    ModuleVersion        = '1.0.0'
+    ModuleVersion        = '1.0.1'
     GUID                 = 'a3cc54c8-3a82-4668-a4bb-9164e0d312b8'
     Author               = 'Darren J Robinson'
     CompanyName          = 'Community'
     Copyright            = '(c) 2025 Darren J Robinson. All rights reserved.'
-    Description          = "Dayforce PowerShell Module"
-    PowerShellVersion    = '5.1'
-    CompatiblePSEditions = 'Desktop', 'Core'
+    Description          = 'Dayforce PowerShell Module'
+    PowerShellVersion    = '7.0'
+    CompatiblePSEditions = 'Core'
     RequiredModules      = ''
-    FunctionsToExport    = @('Connect-Dayforce', 'Get-DayForceEmployees', 'Get-DayForceEmployee', 'Build-UserProfile', 'Start-EmployeeBulkExport', 'Get-EmployeeBulkExportStatus', 'Get-EmployeeBulkExport', 'Update-DayForceEmployee', 'Update-DayForceEmployeeSSOAccount', 'Update-DayForceEmployeeContact', 'Invoke-DayForceRequest')
+    FunctionsToExport    = @('Connect-Dayforce', 'Get-TenantID', 'Get-DayForceEmployees', 'Get-DayForceEmployee', 'Build-UserProfile', 'Start-EmployeeBulkExport', 'Get-EmployeeBulkExportStatus', 'Get-EmployeeBulkExport', 'Update-DayForceEmployee', 'Update-DayForceEmployeeSSOAccount', 'Update-DayForceEmployeeContact', 'Invoke-DayForceRequest')
     CmdletsToExport      = @()
     VariablesToExport    = @()
     AliasesToExport      = @()
@@ -24,8 +24,8 @@
 # SIG # Begin signature block
 # MIIoJQYJKoZIhvcNAQcCoIIoFjCCKBICAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCC5IaLv3zZQnELU
-# icGuSQWa9TZOqLeMIL2XMkNrwF43G6CCISgwggWNMIIEdaADAgECAhAOmxiO+dAt
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCDX6NnKxHerbbDq
+# S5WQ1yOSkeEmupZ4xG4ZQYwbizGlsKCCISgwggWNMIIEdaADAgECAhAOmxiO+dAt
 # 5+/bUOIIQBhaMA0GCSqGSIb3DQEBDAUAMGUxCzAJBgNVBAYTAlVTMRUwEwYDVQQK
 # EwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xJDAiBgNV
 # BAMTG0RpZ2lDZXJ0IEFzc3VyZWQgSUQgUm9vdCBDQTAeFw0yMjA4MDEwMDAwMDBa
@@ -207,34 +207,34 @@
 # ZWQgRzQgQ29kZSBTaWduaW5nIFJTQTQwOTYgU0hBMzg0IDIwMjEgQ0ExAhAJyOxc
 # NH0HIFnMqDXop2/4MA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAI
 # oAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIB
-# CzEOMAwGCisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIFUY4YkEyQgSqOqDzJEo
-# UrUCdu7XAvqgjKZZUh89YVK1MA0GCSqGSIb3DQEBAQUABIICACSAkTBcyVZVtUvW
-# gtwN+zw7h+AXhwx4R4z3TUgi4ipf6RF7id+yhxqYUkEiAioqYVHFBJ0veFeM1Nr4
-# +KF7Iq3Kb6XgKJUq2AQ0e1zjM9hLghk1ahYVK2BIc0IaLt5nyPbMhCVZJu2+zIM/
-# 2YOnLGqIUZK2RwKNt82LJuYtBvO/u+yTot5V1NwUY7dyjZJPYnbJiiGGVcWrgFmX
-# A+99CDjrLqqrNEp0f6BiMfKdH2qPgUVoe5oF9S9ZTaRATIScQ1zHciaOnS0MGn0W
-# nxFN0HVNbR9dmRu/oHMBJESCZLFt9CnzTG7oeuRir9qHIHN11q5oRYgH6n+pNcqP
-# 4LpGtTKtCFLcIqkfR/ICtOY/+MJNqgiaoHBeDi76oEmvvtJKVw7PL6kkDZ1V6H1/
-# JVuzVK9lSxLUtJcIHEOYK23wjOzAB7dGa+wJl8gLdJPRMnpC7j3DBE6XKOIwjNnw
-# 2oxsbW3CLNvNULFntf6SijxNzOCucjBEP58bLlguAj1y12GWamYk1TPT3z2zBTLG
-# slcVONZB4jp8abNIg53iIbMRZNv5v9N4JZge6fd9zOUJxEb7jlOFy4IKlaTzSV7K
-# ra+FdNF8ZXLJM0x0rLR+RNgUTP6a+7vugfMx0xsod6Vj+/Bj8TQA94X47l6g9LTG
-# htlIZiUd9iQh8oSHon2Il2lFNNf4oYIDIDCCAxwGCSqGSIb3DQEJBjGCAw0wggMJ
+# CzEOMAwGCisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIIpg+7ci7jPl6BMUGwSp
+# e1Ekh4xNkxettHufu5WHg38mMA0GCSqGSIb3DQEBAQUABIICAHvShjTNf0M9gnAE
+# 8h3Il5R6RJMyCOsp6kSzlCZgeTj/5qxWmhLP6UwzUsZqwtbdlltGDBt1s8VcRxZq
+# 8yH1H6cd0cQ8FxhqRiIKFB4Udkdt8pMoJHXIToaLTTxf76ACHTlzYn0dVD/QTiEH
+# xDVVLXDcZVFy0iLStelcYO4/60bBq4aZUhI5P+wa5rQ5p2N4BNRslPvUroB1886P
+# 1RiwSco/0imLdCLI4nssK/Wv6jY9XCS/Q/mn1PHjchNKDx/qvZoa4uwEp9decRvb
+# Ot8MuOFY6CV+rYjVqmH77q2kxVvN4YQ7O4LfVOWzbwOBFIWPAhtF11Qyg1VMJWqT
+# X9TIL7GtdlyRmLVZwidzLhL8WTgrVJ/7LHqQ2gSxeeMp9JmUH7DZKZ/6tsTNOXdT
+# eM8QUybwucKmWuJ04y3VpPmuwGO7tB/qVF5A/Gj8mwhk6fSUqSFsJGNgiU8Motdm
+# yqhYbs3i7gsdINynmXC8qxsFRsQDg2kiZeia10njfOctNYMDGsdAmcJRe0CBw1c3
+# kpOlqF/UWjHGMlhwYctufhtL4LrQV0UOLVIMP2isHBXTijmx426UX426n+GsEAa5
+# mXc5LT4E90oTxscanrOdnQLYveufmheegBVfKIUhgeATefXg4VxnVijYspQA06g4
+# e6Xtu9IgJEERqkcR+//7aHrX6U8KoYIDIDCCAxwGCSqGSIb3DQEJBjGCAw0wggMJ
 # AgEBMHcwYzELMAkGA1UEBhMCVVMxFzAVBgNVBAoTDkRpZ2lDZXJ0LCBJbmMuMTsw
 # OQYDVQQDEzJEaWdpQ2VydCBUcnVzdGVkIEc0IFJTQTQwOTYgU0hBMjU2IFRpbWVT
 # dGFtcGluZyBDQQIQC65mvFq6f5WHxvnpBOMzBDANBglghkgBZQMEAgEFAKBpMBgG
-# CSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTI1MDMwMzA2
-# MTQ1M1owLwYJKoZIhvcNAQkEMSIEID/1PHtpKd7LY48CYR4JnMltuee4BbtOT1tb
-# FbdIqshbMA0GCSqGSIb3DQEBAQUABIICAJbgdI9D1QM8/cyCyR2dDVwICf+A2LF7
-# 1EbyQSWSHiECecGT8hAms9BlB6OFdBBf/bqMNFpUzbhGqP/pd7wD/wHkayCKtnWw
-# JFA3+yBSGA3t3X9Lf2JhzXIpsPdQTs1kl7ao+4lRmtSk0pfy7mS1yq5HJnP0MyAN
-# a+dIyhFGfP+8wabws6Nispu7zaQG3kah4ASozqFAojhcMgntAA69O4rcwQdW5RXJ
-# UMTPUJuDkm9XuHbY+kI0i2F+dqEnVQ9CWejzNSsHz6RerBXp7ADAkudAkgLQMcOD
-# kEcZLKYUKnY7ctVUcKn0tsvSv62RgsWjvvgtvJCP2DLdeiVo8PJG3bnYVI7vGg1J
-# k3UpmCH9fiAoyhxMUgUWSmOgO5EYwdEEsDytb2O4j/DafsEVOuDrkEQ8gQ9lFskC
-# X+InH2N5zNgCfyyCP98wQqq/d2uw6wdMsse5NPmYOSaR+FCHHeJpFNHNsyTqgo8j
-# 7y1T5RMOYSwaFBfIKFRwWPvQUSFbUN93BHyOFkdo8ESha9zXNovM2amAe6w6CJC+
-# C6o3I1E5cPEjrZt/TawNIjFZ0DNdEkkpSDmpNLNpdjMUrAp+KrZscXp0F8kksn26
-# 8TdsBJ8WLLwvl67SuImKRjuPyfXc+p02pAvuU7N67qqSWE7GbFqClAdkH/dRLlUm
-# Y8gueqkWSUSq
+# CSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTI1MDUzMTAy
+# NTQ0N1owLwYJKoZIhvcNAQkEMSIEIFLmS7yTbp/3ZXhcyI/vpNWmrUJDYqhw1lkx
+# n8mVVwBQMA0GCSqGSIb3DQEBAQUABIICALgazjF+PtvjjIxLWZAoxgGNK958sHQe
+# of9TSFZmnNXEILUVu7gvUq7XSJTSUM00EvVnq97w3MiHbb8BYhDD0XolCwM+iz+t
+# B1YNDr8Fha1+7s3jGbn5JwHwUnkOyO1j4wQ4TdJPw1DMhCEgpcobSxEJNFcFYctD
+# jjGayqeSFo2qGFgVeBzCSI7DFT7g3R55uKe4hdVJL6pRSJVG4VqBj/8deTv4yfZv
+# gzjP3nA406kCpj5kXIuPR/e4+RWcJAIEsPQBW/xLewf3GBDvAOkNUJM5sRo4+hGk
+# KC/Oa4c4u5mcMJIIXIOnzl7/+goja5YHyBjg6pRktedPiHqlT62YkbVW0MBZ6wyq
+# CT6tPpSxW3DFJphPLFCFINqtsDnNfZbagHD4DaAuxL4bf7IamM6WvjxEaHwoe3ue
+# Nck2E3LOv1fHBrYSWMRCYvUqLRPzyYymvVcdsa6AuFuwgQgewHgEA8iAEoobt6/7
+# yuHNKfagqTXHxET+YzUrTfhvBmqHJoefNhwqD4vGp9p+7YhBhuocxQSpoLM6R28v
+# p0aVaYS82z+BuC1NoWhuKFd0CTSpdJZrukuzCLUu93VAl23prQmM8e63jpwNr7yw
+# jxDcp6hEBa30SzO+i9LjqMw2RDXErhUXc2oHgS2MVKPBlU4CW/4GqIWeznIpXJ7R
+# EVSJAsYjiLTp
 # SIG # End signature block

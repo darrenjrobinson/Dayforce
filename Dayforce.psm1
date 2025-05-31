@@ -98,8 +98,9 @@ The content type of this body should be application/x-www-form-urlencoded.
     try {
         $response = Invoke-RestMethod -Uri "$($dfAPIURI)/connect/token" -Method Post -Headers $headers -Body $body -verbose -debug 
         if ($null -ne $response.access_token) {
-
-            # $Global:dfCompanyId = $companyId
+            # set Global variables for use in subsequent calls in other cmdlets
+            $Global:dfTenantId = Get-TenantID -credential $credential -companyId $companyId -environment $environment
+            
             return $Global:dfAccessToken = $response.access_token
         } 
     }
@@ -108,6 +109,85 @@ The content type of this body should be application/x-www-form-urlencoded.
     }
 }
 
+Function Get-TenantID {
+    <#
+.SYNOPSIS
+Get the Tenant ID from Dayforce client metadata.
+
+.DESCRIPTION
+Get the Tenant ID from Dayforce client metadata by calling the client metadata endpoint. Sets the Global variable $dfTenantId for use in subsequent calls to Dayforce.
+
+.PARAMETER credential 
+PScredential
+Username and Password (as SecureString in the Credential object) for the Dayforce user dedicated to Web service calls.
+
+.PARAMETER companyId 
+string
+Dayforce CompanyId
+
+.PARAMETER environment 
+string
+Dayforce Environment. Defaults to Stage. Valid values are Production, Touch, Config, Test, Stage, Train.
+
+.EXAMPLE
+Get-TenantID -credential $cred -companyId "MYCOMPANY" -environment "Production"
+
+.LINK
+http://darrenjrobinson.com/
+
+    #>
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [pscredential]$credential,    
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]    
+        [string]$companyId,
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [ValidateSet("Production", "Touch", "Config", "Test", "Stage", "Train")]
+        [string]$environment = "Stage"
+    )
+   
+    switch ($environment) {
+        "Production" {
+            $Global:dfMetadataURI = "https://www.dayforcehcm.com/api/$companyId/v1/clientmetadata"
+        }
+        "Touch" {
+            $Global:dfMetadataURI = "https://touch.dayforcehcm.com/api/$companyId/v1/clientmetadata"
+        }
+        "Test" {
+            $Global:dfMetadataURI = "https://test.dayforcehcm.com/api/$companyId/v1/clientmetadata"
+        }
+        "Stage" {
+            $Global:dfMetadataURI = "https://stage.dayforcehcm.com/api/$companyId/v1/clientmetadata"
+        }
+        "Config" {
+            $Global:dfMetadataURI = "https://config.dayforcehcm.com/api/$companyId/v1/clientmetadata"
+        }
+        "Train" {
+            $Global:dfMetadataURI = "https://train.dayforcehcm.com/api/$companyId/v1/clientmetadata"
+        }
+    }
+
+    $headers = @{
+        Authorization = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($credential.UserName):$($credential.GetNetworkCredential().Password)")) 
+    }
+    
+    try {
+        $response = Invoke-RestMethod -method Get `
+            -Uri $Global:dfMetadataURI `
+            -MaximumRedirection 5 `
+            -Headers $headers `
+            -PreserveAuthorizationOnRedirect 
+  
+        [uri]$envURI = $response.ServiceUri 
+        $Global:dfTenantId = $envURI.Host.Split('.')[0]
+        return $Global:dfTenantId
+    }
+    catch {
+        Write-Error $_
+    }
+}
 
 
 Function Get-DayForceEmployees {
@@ -865,8 +945,8 @@ http://darrenjrobinson.com/
 # SIG # Begin signature block
 # MIIoJQYJKoZIhvcNAQcCoIIoFjCCKBICAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCA2XcRpXd+Enqh9
-# JflZh8co0O+hrZaRSHrhpeGytletzKCCISgwggWNMIIEdaADAgECAhAOmxiO+dAt
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCCZM5kmVp1QSRBa
+# v4SPMShovobgWjkXtwNOnlWWnBdqb6CCISgwggWNMIIEdaADAgECAhAOmxiO+dAt
 # 5+/bUOIIQBhaMA0GCSqGSIb3DQEBDAUAMGUxCzAJBgNVBAYTAlVTMRUwEwYDVQQK
 # EwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xJDAiBgNV
 # BAMTG0RpZ2lDZXJ0IEFzc3VyZWQgSUQgUm9vdCBDQTAeFw0yMjA4MDEwMDAwMDBa
@@ -1048,34 +1128,34 @@ http://darrenjrobinson.com/
 # ZWQgRzQgQ29kZSBTaWduaW5nIFJTQTQwOTYgU0hBMzg0IDIwMjEgQ0ExAhAJyOxc
 # NH0HIFnMqDXop2/4MA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAI
 # oAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIB
-# CzEOMAwGCisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEINE0kKMsOaDmX0LJzyzd
-# nzPlUg3FGTpO4f/nM94ViFfLMA0GCSqGSIb3DQEBAQUABIICABtHYZjJxDtBJezk
-# cW0qRFESTpCDNMbIKjsw4o++nDXgpQmqAUA2IRTyJMCwLSpAVQBzYyrtKAoUbLZw
-# 9Lyjg2eVDRAfpHf7BDhQa4MC5GSWOpsuJnxf59wT0d7v35I3oWFMCzfz1fGiO7YR
-# 5w+GhB988DRIYZX1xaVXFDWJr/lPJv1Ot3OVHHDxV1J+0hfZiHminGWcGrIaYWVH
-# qmruLkTMAMFPoRXeobvuS0dzo0nHTGNKAdT7M1pjTS0ixNPHM0TGV+1oLs48sN/w
-# BrTrSqhVUzYfu8rvqxqa1/8IEqY+Ffsw+AEYStpH5e4rwhnTJoU9whE9rCGE3+jH
-# eDu8N6jFnfFkmG4F5lzuo5+TCwJDWrxemA3WPU5Yji+y8V4+szXTSTTVQu3et0nZ
-# 2yYZE2tES0K8MnwV/lERiPLgC77P25eHPp582S7uMf7twVIoBGPuUDUGyRsoswKQ
-# sCHLTnX3sN+MVTancgpwbrmO62QAIfutft7tIkRo2SVmi6ebF1BNkb91RoppicYb
-# kFkKZvV8Vho7mSYviNdq7fPQz8MnMlVOPsh4CZmRJmLTLaTL1GCK+P3mw0yOVXsV
-# akmULgBG1nvJ4sBwuL5A8llRaBDO4QOCItu3AVibmWGcbgmot//sYE82jiuf7yzy
-# shwAZVAH08xFDg0M+M5a7I1TEv94oYIDIDCCAxwGCSqGSIb3DQEJBjGCAw0wggMJ
+# CzEOMAwGCisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIABNdsDMjI2Q54NHIti4
+# X0PX0wP6FDkNUEbOcfBufbGmMA0GCSqGSIb3DQEBAQUABIICAAvu5DAsCvb/UXYE
+# kNWwMyLR31oLB+tKwkzrkUa5+sq/VyQBUbamSEwiazg76Er82fIeO0rIUdDa4JUw
+# BJ9uPhw/2lebFMRqQXA5E+v206Ld+JJt3bUb36sZuIXRIy171RpEXy7z37jBeK0c
+# vmsoO+BTMpMffi7DYMtL7mZEoogkL/bgk5cvyyDFFHVBvQKhstaRQhiMnzANsCVr
+# 47GZ+0WAiALvU91zm0t1rb1gn6lp+YJlLYsCCjlcam5RInfD03UHVPqeYo+Tw9UM
+# Tobc6jQPT429SEy+G9C1axaOyzj5adQiraGuYGYeTTUimOIIgQgiRJwjUNsyPPF4
+# kNV/yti5jqeRaPsFSusqTIecGzTOMT9rrd51hpbKGWU7oAvSl5/EJKcIu/ldhlAe
+# nUwifGOAULXUs3GBxlnT17EKnUQilM8YAZDtuSZ7pt92yCzoVN8a5+FEU2268hEN
+# 6Kxcap6wY7GUdnQXm7BJtnB0/Zkwkarrq/dnAr9M4dcrghUjXfgEtjInNClzFqNb
+# ewiJwiw07b67ElwT1lXr0nWqKH7TviX4ZOIrzzgail3u3OTdCS1G2+Bf2Qxvatvd
+# 0YeXmqk+lGodD45mDbUbdlTgTi5r7TA21EoxAu+AstKK+fQQNlNo324p9w3RTIid
+# mK/mO44RQVLmmAKS9yFx8O7foV4IoYIDIDCCAxwGCSqGSIb3DQEJBjGCAw0wggMJ
 # AgEBMHcwYzELMAkGA1UEBhMCVVMxFzAVBgNVBAoTDkRpZ2lDZXJ0LCBJbmMuMTsw
 # OQYDVQQDEzJEaWdpQ2VydCBUcnVzdGVkIEc0IFJTQTQwOTYgU0hBMjU2IFRpbWVT
 # dGFtcGluZyBDQQIQC65mvFq6f5WHxvnpBOMzBDANBglghkgBZQMEAgEFAKBpMBgG
-# CSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTI1MDUyNTIz
-# MDUyMlowLwYJKoZIhvcNAQkEMSIEIKJNqhO0lRYX3OaytJfXl/Apbl28H0u8pQHg
-# XlZ8LZW1MA0GCSqGSIb3DQEBAQUABIICALrAHzexF4XezXeS6zQW1TPHxCO2vByA
-# RDdLJjfg21spfEkyY/cT8KFUO3BtnVpi8Vf4qHM0R29hLlHvEYqcKLKVPjhlPtZ9
-# aJCTsTr0inF0/W3UrEnAl7oRF9N4fH6DMsU3+kTrIS3jRwiePPw2V4RA68+siyKK
-# g2t+BECfOZ1kRfjQUOwrXOWnqMKiBmnk2QqnpoZzZ8sqbO4lH0zH4F/LLlBpYmaM
-# JKGLYHblIgLRHU32rIkp8QV2dH56EYixzM3GTAmCl8DHGOWbhPO9NgvDJ8qBknP9
-# pgGySbBkTZ3J+1DEShXEQGcuY6Ku4DGTmkrYX4DMBGGKTgUDfRoZ75uNb5YlFClN
-# dHG236/Wpc5mgQrtTfOdyqVld5Tw6ZfDhORrBaPmK3ekgP8Ljs3vV11PW+v1hH3X
-# ZPHeuQzUmk4Gc8+fZi5GSEuMngzI7gYsjjt+mAskTksfSk3XaGIDfJzpPXuxK4Ea
-# /3bZJhXnqIZ5pNDyffFXf+zpavHBE7i5nlHvRYfSkiJwBga8AK6MmpDXMvfMZx8m
-# 58vLywzaol6BTvuKjHW/XR8yFk/Ulth2dI1BCk8xjx4qZ4M4S5aJbfSaIWQQdAng
-# xcw7BodiufgYV3y3jBNVmA1W6PPcYPpNGNB0aZNegESNJw/AtJdeXGlD788AshTS
-# ME0AW9t2gxHf
+# CSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTI1MDUzMTAy
+# NDQyNlowLwYJKoZIhvcNAQkEMSIEIKgfud7xODg5R5tf9sbAprG7y1QHUPOfxhyd
+# N2lFBPthMA0GCSqGSIb3DQEBAQUABIICABoJPnn9nsIKb+p7ZkMrbJhWCsBxH1eg
+# OYLRA91F0rILe9KxNhv0EqbSyCIn7g2a36rIH8PunLIi377gSMvrITRigo0vMpLD
+# noU0/59LGMOyr5r/JlS2GKAsUo7APFNVZAJgXXlP7QdHMk9y63CvFUUKlY36Eqhh
+# YXuwY+2vC7AN/0az2sRCzANg4gr0pIzCNTfw/78U0R+BZLwFNzQ8GoYNaGK41ias
+# hAetIzKMc1Ghw9uji+Ol159WHcp8ItNy6ATem9duTeiInUUUwvbvGGPPlsUok/lz
+# RimnxJSmoVJP5gXxK4y7uHBvxYIfRb2wMXa8wixxWObpz4O7uUMJOVyppTyJkwQO
+# Q5sJbSHt584K4pEubM2gLVPm85h5ijA34Ip6voXjKytoKfAB6FJInR3Oxr+IFHuM
+# 3Yqwz+FlSjY1zfFJplNlYFIqUHEPNdHSMZGcXgbV0QBaUTLJnmcNbH/CFxpI9amu
+# 36nt9FNjbRKqgnXlQZCoiD++MNFTfNp+23DWN/FbyQ+opUs21e92LgNTXjGPpunW
+# y+LRuRKZ8pq3IdKxn3DjWAr3bI7ixDJpS8vNPi3sEU+HPlI2imjhlNrTNU6eYgHc
+# EbnQHR/7PW15reUVH/MAuxPiSVE2iOEqQ7JvYuWcXjF+AA8giFAU/gvxMIo/ovt1
+# dt88RzLFT2b6
 # SIG # End signature block
