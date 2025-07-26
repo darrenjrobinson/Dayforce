@@ -19,6 +19,7 @@ Get-DayForceEmployee              Get an Employee from Dayforce
 Get-DayForceEmployees             Get Employees from Dayforce
 Get-EmployeeBulkExport            Get a Bulk Export of Employees from Dayforce
 Get-EmployeeBulkExportStatus      Get a Bulk Export Request Status from Dayforce
+Get-TenantID                      Get the Tenant ID from Dayforce client metadata.
 Invoke-DayForceRequest            Submit a Dayforce API Request.
 Start-EmployeeBulkExport          Request a Bulk Export of Employees from Dayforce
 Update-DayForceEmployee           Update an Employee in Dayforce
